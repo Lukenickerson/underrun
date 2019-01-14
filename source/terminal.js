@@ -1,71 +1,71 @@
 
 var terminal_text_ident = '&gt; ';
-var terminal_text_title = '' +
-	'UNDERRUN\n' +
-	'__ \n' +
-	'CONCEPT, GRAPHICS &AMP; PROGRAMMING:\n' +
-	'DOMINIC SZABLEWSKI // PHOBOSLAB.ORG\n' +
-	'__ \n' +
-	'MUSIC:\n' +
-	'ANDREAS LÖSCH // NO-FATE.NET\n' +
-	'___ \n' +
-	'SYSTEM VERSION: 13.20.18\n' +
-	'CPU: PL(R) Q-COATL 7240 @ 12.6 THZ\n' +
-	'MEMORY: 108086391056891900 BYTES\n' +
-	' \n' +
-	'CONNECTING...';
+var terminal_text_title = ''; // +
+	// 'UNDERRUN\n' +
+	// '_ \n' +
+	// 'CONCEPT, GRAPHICS &AMP; PROGRAMMING:\n' +
+	// 'DOMINIC SZABLEWSKI // PHOBOSLAB.ORG\n' +
+	// '_ \n' +
+	// 'MUSIC:\n' +
+	// 'ANDREAS LÖSCH // NO-FATE.NET\n' +
+	// '_ \n'
+	// + 'SYSTEM VERSION: 13.20.18\n' +
+	// 'CPU: PL(R) Q-COATL 7240 @ 12.6 THZ\n' +
+	// 'MEMORY: 108086391056891900 BYTES\n' +
+	// ' \n' +
+	// 'CONNECTING...';
 
-var terminal_text_garbage = 
-	'´A1e{∏éI9·NQ≥ÀΩ¸94CîyîR›kÈ¡˙ßT-;ûÅf^˛,¬›A∫Sã€«ÕÕ' +
-	'1f@çX8ÎRjßf•ò√ã0êÃcÄ]Î≤moDÇ’ñ‰\\ˇ≠n=(s7É;';
+var terminal_text_garbage = '';
+	// '´A1e{∏éI9·NQ≥ÀΩ¸94CîyîR›kÈ¡˙ßT-;ûÅf^˛,¬›A∫Sã€«ÕÕ' +
+	// '1f@çX8ÎRjßf•ò√ã0êÃcÄ]Î≤moDÇ’ñ‰\\ˇ≠n=(s7É;';
 
-var terminal_text_story = 
-	'DATE: SEP. 13, 2718 - 13:32\n' +
-	'CRITICAL SOFTWARE FAILURE DETECTED\n' +
-	'ANALYZING...\n' +
-	'____\n \n' +
-	'ERROR CODE: JS13K2018\n' +
-	'STATUS: SYSTEMS OFFLINE\n' +
-	'DESCRIPTION: BUFFER UNDERRUN DUE TO SATCOM R.U.D.\n' +
-	'AFFECTED SYSTEM: FACILITY AUTOMATION\n' +
-	'AFFECTED SUBSYSTEMS: AI, RADIATION SHIELDS, POWER MANAGEMENT\n' +
-	' \n' +
-	'INITIATING RESCUE SYSTEM...\n' +
-	'___' +
-	'FAILED\n \n' +
-	'ATTEMPTING AUTOMATED REBOOT...\n' +
-	'___' +
-	'FAILED\n' +
-	'_ \n \n' +
-	'MANUAL REBOOT OF ALL SYSTEMS REQUIRED\n' +
-	'_ \n' +
+var terminal_text_story = '' +
+	// 'DATE: SEP. 13, 2718 - 13:32\n' +
+	// 'CRITICAL SOFTWARE FAILURE DETECTED\n' +
+	// 'ANALYZING...\n' +
+	// '____\n \n' +
+	// 'ERROR CODE: JS13K2018\n' +
+	// 'STATUS: SYSTEMS OFFLINE\n' +
+	// 'DESCRIPTION: BUFFER UNDERRUN DUE TO SATCOM R.U.D.\n' +
+	// 'AFFECTED SYSTEM: FACILITY AUTOMATION\n' +
+	// 'AFFECTED SUBSYSTEMS: AI, RADIATION SHIELDS, POWER MANAGEMENT\n' +
+	// ' \n' +
+	// 'INITIATING RESCUE SYSTEM...\n' +
+	// '___' +
+	// 'FAILED\n \n' +
+	// 'ATTEMPTING AUTOMATED REBOOT...\n' +
+	// '___' +
+	// 'FAILED\n' +
+	// '_ \n \n' +
+	// 'MANUAL REBOOT OF ALL SYSTEMS REQUIRED\n' +
+	// '_ \n' +
 	'USE WASD OR CURSOR KEYS TO MOVE, MOUSE TO SHOOT\n' +
 	'CLICK TO INITIATE YOUR DEPLOYMENT\n ';
 
-var terminal_text_outro = 
-	'ALL SATELLITE LINKS ONLINE\n' +
-	'CONNECTING...___' +
-	'CONNECTION ESTABLISHED\n' +
-	'RECEIVING TRANSMISSION...___ \n' +
+var terminal_text_outro = '';
+	// 'ALL SATELLITE LINKS ONLINE\n' +
+	// 'CONNECTING...___' +
+	// 'CONNECTION ESTABLISHED\n' +
+	// 'RECEIVING TRANSMISSION...___ \n' +
 	
-	'SENT: SEP. 13, 2018\n' +
-	'RCVD: SEP. 13, 2718\n \n' +
+	// 'SENT: SEP. 13, 2018\n' +
+	// 'RCVD: SEP. 13, 2718\n \n' +
 	
-	'THANKS FOR PLAYING ❤_ \n' +
-	'I HAVE PREVIOUSLY BEEN A PROUD SPONSOR OF THE JS13K\n' +
-	'COMPETITION SINCE THE VERY FIRST ONE BACK IN 2012.\n' +
-	'HOWEVER, THIS YEAR\'S COMPETITION WAS MY FIRST ONE\n' +
-	'AS A PARTICIPANT AND IT HAS BEEN TREMENDOUS FUN!\n \n' +
+	// 'THANKS FOR PLAYING ❤_ \n' +
+	// 'I HAVE PREVIOUSLY BEEN A PROUD SPONSOR OF THE JS13K\n' +
+	// 'COMPETITION SINCE THE VERY FIRST ONE BACK IN 2012.\n' +
+	// 'HOWEVER, THIS YEAR\'S COMPETITION WAS MY FIRST ONE\n' +
+	// 'AS A PARTICIPANT AND IT HAS BEEN TREMENDOUS FUN!\n \n' +
 	
-	'I WANT TO THANK MY DEAR FRIEND ANDREAS LÖSCH OF\n' +
-	'NO-FATE.NET FOR COMPOSING SOME AWESOME MUSIC ON\n' + 
-	'SUCH SHORT NOTICE.\n \n' +
+	// 'I WANT TO THANK MY DEAR FRIEND ANDREAS LÖSCH OF\n' +
+	// 'NO-FATE.NET FOR COMPOSING SOME AWESOME MUSIC ON\n' + 
+	// 'SUCH SHORT NOTICE.\n \n' +
 
-	'FURTHER THANKS GO OUT TO THE JS13K STAFF, THE\n' +
-	'SONANT-X DEVELOPERS AND ALL OTHER PARTICIPANTS\n' +
-	'IN THIS YEAR\'S JS13K. SEE YOU NEXT YEAR!\n \n' +
-	'DOMINIC__' +
-	'END OF TRANSMISSION';
+	// 'FURTHER THANKS GO OUT TO THE JS13K STAFF, THE\n' +
+	// 'SONANT-X DEVELOPERS AND ALL OTHER PARTICIPANTS\n' +
+	// 'IN THIS YEAR\'S JS13K. SEE YOU NEXT YEAR!\n \n' +
+	// 'DOMINIC__' +
+	// 'END OF TRANSMISSION';
 
 var terminal_text_buffer = [],
 	terminal_state = 0,
@@ -74,6 +74,9 @@ var terminal_text_buffer = [],
 	terminal_print_ident = true,
 	terminal_timeout_id = 0,
 	terminal_hide_timeout = 0;
+const showNoticeWait = 200; // 2000;
+const introWait = 200; // 4000;
+const garbageTime = 200; // 1500;
 
 terminal_text_garbage += terminal_text_garbage + terminal_text_garbage;
 
@@ -85,7 +88,7 @@ function terminal_show() {
 
 function terminal_hide() {
 	a.style.opacity = 0;
-	terminal_hide_timeout = setTimeout(function(){a.style.display = 'none'}, 1000);
+	terminal_hide_timeout = setTimeout(() => { a.style.display = 'none'; }, 1000);
 }
 
 function terminal_cancel() {
@@ -99,8 +102,7 @@ function terminal_prepare_text(text) {
 function terminal_write_text(lines, callback) {
 	if (lines.length) {
 		terminal_write_line(lines.shift(), terminal_write_text.bind(this, lines, callback));
-	}
-	else {
+	} else {
 		callback && callback();
 	}
 }
@@ -127,7 +129,7 @@ function terminal_show_notice(notice, callback) {
 		terminal_timeout_id = setTimeout(function(){
 			terminal_hide();
 			callback && callback();
-		}, 2000);
+		}, showNoticeWait);
 	});
 }
 
@@ -136,7 +138,7 @@ function terminal_run_intro(callback) {
 	terminal_write_text(terminal_prepare_text(terminal_text_title), function(){
 		terminal_timeout_id = setTimeout(function(){
 			terminal_run_garbage(callback);
-		}, 4000);
+		}, introWait);
 	});
 }
 
@@ -156,7 +158,7 @@ function terminal_run_garbage(callback) {
 	terminal_write_text(terminal_prepare_text(t), function(){
 		terminal_timeout_id = setTimeout(function(){
 			terminal_run_story(callback);
-		}, 1500);
+		}, garbageTime);
 	});
 }
 

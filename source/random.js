@@ -1,18 +1,20 @@
-var rand_high, rand_low;
-
-function random_int(min, max) {
-	rand_high = ((rand_high << 16) + (rand_high >> 16) + rand_low) & 0xffffffff;
-	rand_low = (rand_low + rand_high) & 0xffffffff;
-	var n = (rand_high >>> 0) / 0xffffffff;
-	return (min + n * (max-min+1))|0;
-}
-
-function random_seed(seed) {
-	rand_high = seed || 0xBADC0FFE;
-	rand_low = seed ^ 0x49616E42;
-}
-
-function array_rand(array) {
-	return array[random_int(0, array.length-1)];
-}
-
+let random = (() => {
+	const o = {
+		high: null,
+		low: null,
+		int: function (min, max) {
+			o.high = ((o.high << 16) + (o.high >> 16) + o.low) & 0xffffffff;
+			o.low = (o.low + o.high) & 0xffffffff;
+			var n = (o.high >>> 0) / 0xffffffff;
+			return (min + n * (max-min+1))|0;
+		},
+		seed: function (seed) {
+			o.high = seed || 0xBADC0FFE;
+			o.low = seed ^ 0x49616E42;
+		},
+		array: function (arr) {
+			return arr[o.int(0, arr.length-1)];
+		}
+	};
+	return o;
+})();

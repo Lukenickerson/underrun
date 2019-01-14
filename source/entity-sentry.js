@@ -54,7 +54,7 @@ class entity_sentry_t extends entity_t {
 	_kill() {
 		super._kill();
 		new entity_explosion_t(this.x, 0, this.z, 0, 26);
-		camera_shake = 3;
+		camera.shake(3);
 		audio_play(audio_sfx_explode);
 	}
 }

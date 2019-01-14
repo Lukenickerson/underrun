@@ -1,7 +1,6 @@
 
 var udef, // global undefined
 	_math = Math,
-	_document = document,
 	_temp,
 
 	keys = {37: 0, 38: 0, 39: 0, 40: 0},
@@ -24,27 +23,19 @@ var udef, // global undefined
 	entities = [],
 	entities_to_kill = [];
 
-function load_image(name, callback) {
-	_temp = new Image();
-	_temp.src = 'm/'+name+'.png';
-	_temp.onload = callback;
-}
-
 function next_level(callback) {
 	if (current_level == 3) {
 		entities_to_kill.push(entity_player);
 		terminal_run_outro();
-	}
-	else {
+	} else {
 		current_level++;
 		load_level(current_level, callback);
-		
 	}
 }
 
 function load_level(id, callback) {
-	random_seed(0xBADC0DE1 + id);
-	load_image('l'+id, function(){
+	random.seed(0xBADC0DE1 + id);
+	game.loadImage('l'+id, function(){
 		entities = [];
 		num_verts = 0;
 		num_lights = 0;
@@ -52,7 +43,7 @@ function load_level(id, callback) {
 		cpus_total = 0;
 		cpus_rebooted = 0;
 
-		_temp = _document.createElement('canvas');
+		_temp = game.doc.createElement('canvas');
 		_temp.width = _temp.height = level_width; // assume square levels
 		_temp = _temp.getContext('2d')
 		_temp.drawImage(this, 0, 0);
@@ -70,8 +61,8 @@ function load_level(id, callback) {
 				if (color_key !== 0) {
 					var tile = level_data[index] =
 						color_key === 0x888 // wall
-								? random_int(0,5) < 4 ? 8 : random_int(8, 17)
-								: array_rand([1,1,1,1,1,3,3,2,5,5,5,5,5,5,7,7,6]); // floor
+								? random.int(0, 5) < 4 ? 8 : random.int(8, 17)
+								: random.array([1,1,1,1,1,3,3,2,5,5,5,5,5,5,7,7,6]); // floor
 
 
 					if (tile > 7) { // walls
@@ -81,10 +72,10 @@ function load_level(id, callback) {
 						push_floor(x * 8, y * 8, tile-1);
 
 						// enemies and items
-						if (random_int(0, 16 - (id * 2)) == 0) {
+						if (random.int(0, 16 - (id * 2)) == 0) {
 							new entity_spider_t(x*8, 0, y*8, 5, 27);
 						}
-						else if (random_int(0, 100) == 0) {
+						else if (random.int(0, 100) == 0) {
 							new entity_health_t(x*8, 0, y*8, 5, 31);
 						}
 					}
@@ -121,9 +112,7 @@ function load_level(id, callback) {
 			}
 		}
 
-		camera_x = -entity_player.x;
-		camera_y = -300;
-		camera_z = -entity_player.z - 100;
+		camera.init(entity_player);
 
 		level_num_verts = num_verts;
 
@@ -143,92 +132,128 @@ function preventDefault(ev) {
 	ev.preventDefault();
 }
 
-_document.onkeydown = function(ev){
-	_temp = ev.keyCode;
-	_temp = key_convert[_temp] || _temp;
-	if (keys[_temp] !== udef) {
-		keys[_temp] = 1;
-		preventDefault(ev);
+var camera = {
+	x: 0,
+	y: 0,
+	z: 0,
+	s: 0, // shake value
+	init: function (who) {
+		this.x = -who.x;
+		this.y = -300;
+		this.z = -who.z - 100;
+	},
+	center: function (who) {
+		this.x = this.x * 0.92 - who.x * 0.08;
+		this.y = this.y * 0.92 - who.y * 0.08;
+		this.z = this.z * 0.92 - who.z * 0.08;
+	},
+	shake: function (s) {
+		if (s) {
+			this.s = s;
+			return;
+		}
+		this.s *= 0.9;
+		this.x += this.s * (Math.random()-0.5);
+		this.z += this.s * (Math.random()-0.5);
 	}
-}
+};
 
-_document.onkeyup = function(ev) {
-	_temp = ev.keyCode;
-	_temp = key_convert[_temp] || _temp;
-	if (keys[_temp] !== udef) {
-		keys[_temp] = 0;
-		preventDefault(ev);
-	}
-}
+var game = {
+	init: function (doc) {
+		this.doc = doc;
+		this.setupEvents(doc);
+	},
 
-_document.onmousemove = function(ev) {
-	mouse_x = (ev.clientX / c.clientWidth) * c.width;
-	mouse_y = (ev.clientY / c.clientHeight) * c.height;
-}
-
-_document.onmousedown = function(ev) {
-	keys[key_shoot] = 1;
-	preventDefault(ev);
-}
-
-_document.onmouseup = function(ev) {
-	keys[key_shoot] = 0;
-	preventDefault(ev);
-}
-
-function game_tick() {
-	var time_now = performance.now();
-	time_elapsed = (time_now - time_last)/1000;
-	time_last = time_now;
-
-	renderer_prepare_frame();
-
-	// update and render entities
-	for (var i = 0, e1, e2; i < entities.length; i++) {
-		e1 = entities[i];
-		if (e1._dead) { continue; }
-		e1._update();
-
-		// check for collisions between entities - it's quadratic and nobody cares \o/
-		for (var j = i+1; j < entities.length; j++) {
-			e2 = entities[j];
-			if(!(
-				e1.x >= e2.x + 9 ||
-				e1.x + 9 <= e2.x ||
-				e1.z >= e2.z + 9 ||
-				e1.z + 9 <= e2.z
-			)) {
-				e1._check(e2);
-				e2._check(e1);
+	setupEvents: function (doc) {
+		doc.onkeydown = (ev) => {
+			_temp = ev.keyCode;
+			_temp = key_convert[_temp] || _temp;
+			if (keys[_temp] !== udef) {
+				keys[_temp] = 1;
+				preventDefault(ev);
 			}
+		};
+		
+		doc.onkeyup = (ev) => {
+			_temp = ev.keyCode;
+			_temp = key_convert[_temp] || _temp;
+			if (keys[_temp] !== udef) {
+				keys[_temp] = 0;
+				preventDefault(ev);
+			}
+		};
+		
+		doc.onmousemove = (ev) => {
+			mouse_x = (ev.clientX / c.clientWidth) * c.width;
+			mouse_y = (ev.clientY / c.clientHeight) * c.height;
+		};
+		
+		doc.onmousedown = (ev) => {
+			keys[key_shoot] = 1;
+			preventDefault(ev);
+		};
+		
+		doc.onmouseup = (ev) => {
+			keys[key_shoot] = 0;
+			preventDefault(ev);
+		};
+	},
+
+	loadImage: function (name, callback) {
+		_temp = new Image();
+		_temp.src = 'm/' + name + '.png';
+		_temp.onload = callback;
+	},
+
+	tick: function () {
+		var time_now = performance.now();
+		time_elapsed = (time_now - time_last)/1000;
+		time_last = time_now;
+
+		renderer_prepare_frame();
+
+		// update and render entities
+		for (var i = 0, e1, e2; i < entities.length; i++) {
+			e1 = entities[i];
+			if (e1._dead) { continue; }
+			e1._update();
+
+			// check for collisions between entities - it's quadratic and nobody cares \o/
+			for (var j = i+1; j < entities.length; j++) {
+				e2 = entities[j];
+				if(!(
+					e1.x >= e2.x + 9 ||
+					e1.x + 9 <= e2.x ||
+					e1.z >= e2.z + 9 ||
+					e1.z + 9 <= e2.z
+				)) {
+					e1._check(e2);
+					e2._check(e1);
+				}
+			}
+
+			e1._render();		
 		}
 
-		e1._render();		
+		camera.center(entity_player);
+		camera.shake();
+
+		// health bar, render with plasma sprite
+		for (var i = 0; i < entity_player.h; i++) {
+			push_sprite(-camera.x - 50 + i * 4, 29-camera.y, -camera.z-30, 26);
+		}
+
+		renderer_end_frame();
+
+
+		// remove dead entities
+		entities = entities.filter(function(entity) {
+			return entities_to_kill.indexOf(entity) === -1;
+		});
+		entities_to_kill = [];
+
+		requestAnimationFrame(() => { this.tick(); });
 	}
+};
 
-	// center camera on player, apply damping
-	camera_x = camera_x * 0.92 - entity_player.x * 0.08;
-	camera_y = camera_y * 0.92 - entity_player.y * 0.08;
-	camera_z = camera_z * 0.92 - entity_player.z * 0.08;
-
-	// add camera shake
-	camera_shake *= 0.9;
-	camera_x += camera_shake * (_math.random()-0.5);
-	camera_z += camera_shake * (_math.random()-0.5);
-
-	// health bar, render with plasma sprite
-	for (var i = 0; i < entity_player.h; i++) {
-		push_sprite(-camera_x - 50 + i * 4, 29-camera_y, -camera_z-30, 26);
-	}
-
-	renderer_end_frame();
-
-
-	// remove dead entities
-	entities = entities.filter(function(entity) {
-		return entities_to_kill.indexOf(entity) === -1;
-	});
-	entities_to_kill = [];
-
-	requestAnimationFrame(game_tick);
-}
+game.init(document);
