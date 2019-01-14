@@ -4,13 +4,14 @@ terminal_write_line('INITIATING...');
 
 function main() {
 	function startAfterLoadImage() {
+		const img = this;
 		terminal_hide();
-		renderer_bind_image(this);
+		renderer.bindImage(img);
 		next_level(() => { game.tick(); });
 	}
 
 	function startAfterLine() {
-		renderer_init();		
+		renderer.init();		
 		game.loadImage('q2', startAfterLoadImage);
 	}
 

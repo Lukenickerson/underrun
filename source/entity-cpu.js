@@ -11,7 +11,7 @@ class entity_cpu_t extends entity_t {
 		var intensity = this.h == 5 
 			? 0.02 + _math.sin(this._animation_time*10+_math.random()*2) * 0.01
 			: 0.01;
-		push_light(this.x + 4, 4, this.z + 12, 0.2, 0.4, 1.0, intensity);
+		renderer.pushLight(this.x + 4, 4, this.z + 12, 0.2, 0.4, 1.0, intensity);
 	}
 
 	_check(other) {

@@ -68,7 +68,7 @@ class entity_sentry_plasma_t extends entity_t {
 
 	_render() {
 		super._render();
-		push_light(this.x, 4, this.z + 6, 1.5, 0.2, 0.1, 0.04);
+		renderer.pushLight(this.x, 4, this.z + 6, 1.5, 0.2, 0.1, 0.04);
 	}
 
 	_did_collide() {
