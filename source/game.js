@@ -5,7 +5,6 @@ var udef, // global undefined
 
 	keys = {37: 0, 38: 0, 39: 0, 40: 0},
 	key_up = 38, key_down = 40, key_left = 37, key_right = 39, key_shoot = 512,
-	key_convert = {65: 37, 87: 38, 68: 39, 83: 40}, // convert AWDS to left up down right
 	mouse_x = 0, mouse_y = 0,
 
 	time_elapsed,
@@ -53,23 +52,26 @@ function load_level(id, callback) {
 			for (var x = 0; x < level_width; x++, index++) {
 
 				// reduce to 12 bit color to accurately match
-				var color_key = 
+				var colorKey = (
 					((_temp[index*4]>>4) << 8) + 
 					((_temp[index*4+1]>>4) << 4) + 
-					(_temp[index*4+2]>>4);
+					(_temp[index*4+2]>>4)
+				);
 
-				if (color_key !== 0) {
-					var tile = level_data[index] =
-						color_key === 0x888 // wall
+				if (colorKey !== 0) {
+					var tile = level_data[index] = (
+						colorKey === 0x888 // wall
 								? random.int(0, 5) < 4 ? 8 : random.int(8, 17)
-								: random.array([1,1,1,1,1,3,3,2,5,5,5,5,5,5,7,7,6]); // floor
-
+								: random.array([1,1,1,1,1,3,3,2,5,5,5,5,5,5,7,7,6]) // floor
+					);
 
 					if (tile > 7) { // walls
-						push_block(x * 8, y * 8, 4, tile-1);
-					}
-					else if (tile > 0) { // floor
-						push_floor(x * 8, y * 8, tile-1);
+						// tall blocks for certain tiles
+						var tileSites = tile - 1;
+						var h = ~[8, 9, 17].indexOf(tileSites) ? 16 : 8;
+						renderer.pushBlock(x * 8, y * 8, h, 4, tileSites);
+					} else if (tile > 0) { // floor
+						renderer.pushFloor(x * 8, y * 8, tile-1);
 
 						// enemies and items
 						if (random.int(0, 16 - (id * 2)) == 0) {
@@ -81,19 +83,19 @@ function load_level(id, callback) {
 					}
 
 					// cpu
-					if (color_key === 0x00f) {
+					if (colorKey === 0x00f) {
 						level_data[index] = 8;
 						new entity_cpu_t(x*8, 0, y*8, 0, 18);
 						cpus_total++;
 					}
 
 					// sentry
-					if (color_key === 0xf00) {
+					if (colorKey === 0xf00) {
 						new entity_sentry_t(x*8, 0, y*8, 5, 32);
 					}
 
 					// player start position (blue)
-					if (color_key === 0x0f0) {
+					if (colorKey === 0x0f0) {
 						entity_player = new entity_player_t(x*8, 0, y*8, 5, 18);	
 					}
 				}
@@ -128,36 +130,6 @@ function reload_level() {
 	load_level(current_level);
 }
 
-function preventDefault(ev) {
-	ev.preventDefault();
-}
-
-var camera = {
-	x: 0,
-	y: 0,
-	z: 0,
-	s: 0, // shake value
-	init: function (who) {
-		this.x = -who.x;
-		this.y = -300;
-		this.z = -who.z - 100;
-	},
-	center: function (who) {
-		this.x = this.x * 0.92 - who.x * 0.08;
-		this.y = this.y * 0.92 - who.y * 0.08;
-		this.z = this.z * 0.92 - who.z * 0.08;
-	},
-	shake: function (s) {
-		if (s) {
-			this.s = s;
-			return;
-		}
-		this.s *= 0.9;
-		this.x += this.s * (Math.random()-0.5);
-		this.z += this.s * (Math.random()-0.5);
-	}
-};
-
 var game = {
 	init: function (doc) {
 		this.doc = doc;
@@ -165,9 +137,15 @@ var game = {
 	},
 
 	setupEvents: function (doc) {
+		const keyConvert = {65: 37, 87: 38, 68: 39, 83: 40}; // convert AWDS to left up down right
+
+		function preventDefault(ev) {
+			ev.preventDefault();
+		}
+
 		doc.onkeydown = (ev) => {
 			_temp = ev.keyCode;
-			_temp = key_convert[_temp] || _temp;
+			_temp = keyConvert[_temp] || _temp;
 			if (keys[_temp] !== udef) {
 				keys[_temp] = 1;
 				preventDefault(ev);
@@ -176,7 +154,7 @@ var game = {
 		
 		doc.onkeyup = (ev) => {
 			_temp = ev.keyCode;
-			_temp = key_convert[_temp] || _temp;
+			_temp = keyConvert[_temp] || _temp;
 			if (keys[_temp] !== udef) {
 				keys[_temp] = 0;
 				preventDefault(ev);
@@ -205,12 +183,28 @@ var game = {
 		_temp.onload = callback;
 	},
 
+	checkCollisions: function (e1, i, entities) {
+		// check for collisions between entities - it's quadratic and nobody cares \o/
+		for (var j = i + 1; j < entities.length; j++) {
+			e2 = entities[j];
+			if(!(
+				e1.x >= e2.x + 9 ||
+				e1.x + 9 <= e2.x ||
+				e1.z >= e2.z + 9 ||
+				e1.z + 9 <= e2.z
+			)) {
+				e1._check(e2);
+				e2._check(e1);
+			}
+		}
+	},
+
 	tick: function () {
 		var time_now = performance.now();
 		time_elapsed = (time_now - time_last)/1000;
 		time_last = time_now;
 
-		renderer_prepare_frame();
+		renderer.prepareFrame();
 
 		// update and render entities
 		for (var i = 0, e1, e2; i < entities.length; i++) {
@@ -218,19 +212,7 @@ var game = {
 			if (e1._dead) { continue; }
 			e1._update();
 
-			// check for collisions between entities - it's quadratic and nobody cares \o/
-			for (var j = i+1; j < entities.length; j++) {
-				e2 = entities[j];
-				if(!(
-					e1.x >= e2.x + 9 ||
-					e1.x + 9 <= e2.x ||
-					e1.z >= e2.z + 9 ||
-					e1.z + 9 <= e2.z
-				)) {
-					e1._check(e2);
-					e2._check(e1);
-				}
-			}
+			this.checkCollisions(e1, i, entities);
 
 			e1._render();		
 		}
@@ -240,11 +222,10 @@ var game = {
 
 		// health bar, render with plasma sprite
 		for (var i = 0; i < entity_player.h; i++) {
-			push_sprite(-camera.x - 50 + i * 4, 29-camera.y, -camera.z-30, 26);
+			renderer.pushSprite(-camera.x - 50 + i * 4, 29-camera.y, -camera.z-30, 26);
 		}
 
-		renderer_end_frame();
-
+		renderer.endFrame();
 
 		// remove dead entities
 		entities = entities.filter(function(entity) {

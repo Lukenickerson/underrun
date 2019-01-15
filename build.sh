@@ -1,6 +1,7 @@
 cat \
-	source/game.js \
 	source/random.js \
+	source/camera.js \
+	source/game.js \
 	source/renderer.js \
 	source/entity.js \
 	source/entity-player.js \

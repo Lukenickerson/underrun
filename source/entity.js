@@ -82,6 +82,6 @@ class entity_t {
 
 	_render() { // render
 		var t = this;
-		push_sprite(t.x-1, t.y, t.z, t.s);
+		renderer.pushSprite(t.x-1, t.y, t.z, t.s);
 	}
 }
