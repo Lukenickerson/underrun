@@ -36,8 +36,7 @@ function load_level(id, callback) {
 	random.seed(0xBADC0DE1 + id);
 	game.loadImage('l'+id, function(){
 		entities = [];
-		num_verts = 0;
-		num_lights = 0;
+		renderer.clearVerts().clearLights();
 
 		cpus_total = 0;
 		cpus_rebooted = 0;
@@ -116,7 +115,7 @@ function load_level(id, callback) {
 
 		camera.init(entity_player);
 
-		level_num_verts = num_verts;
+		renderer.setLevelVerts(renderer.verts);
 
 		terminal_show_notice(
 			'SCANNING FOR OFFLINE SYSTEMS...___' +

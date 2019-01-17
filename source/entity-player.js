@@ -40,7 +40,7 @@ class entity_player_t extends entity_t {
 		if (this._last_damage < 0 || this._frame % 6 < 4) {
 			super._render();
 		}
-		renderer.pushLight(this.x, 4, this.z + 6, 1,0.5,0, 0.04);
+		renderer.pushLight(this.x, 4, this.z + 6, 1, 0.5, 0, 0.04);
 	}
 
 	_kill() {

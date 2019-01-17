@@ -1,23 +1,23 @@
-var
-	gl = c.getContext('webgl') || c.getContext('experimental-webgl'),
-	
-	num_verts = 0,
-	level_num_verts,
+var renderer = (function(){
 
-	num_lights = 0,
-
-	camera_uniform;
-
-var renderer = {
+let gl;
+const _math = Math;
+const renderer = {
 	bufferData: null,
 	lightData: null,
 	lightUniform: null,
+	cameraUniform: null,
 	textureSize: 1024,
 	tileSize: 16,
+	halfTileSize: 8,
 	tileFraction: 0,
 	pxNudge: 0,
+	verts: 0, // number of verts
+	lights: 0, // number of lights
+	levelVerts: 0,
 
 	defaultOptions: {
+		canvasId: 'c',
 		shaderAttributeVec: 'attribute vec',
 		shaderVarying: 
 			'precision highp float;' +
@@ -27,6 +27,22 @@ var renderer = {
 		shaderUniform: 'uniform ',
 		shaderConstMat4: "const mat4 ",
 		maxLights: 16,
+	},
+
+	clearVerts: function() {
+		return this.setVerts(0);
+	},
+	clearLights: function() {
+		this.lights = 0;
+		return this;
+	},
+	setVerts: function(v) {
+		this.verts = v;
+		return this;
+	},
+	setLevelVerts: function(v) {
+		this.levelVerts = v;
+		return this;
 	},
 
 	setBufferData: function(maxVerts) {
@@ -40,6 +56,7 @@ var renderer = {
 		const r = this;
 		r.textureSize = textureSize;
 		r.tileSize = tileSize;
+		r.halfTileSize = tileSize / 2;
 		r.tileFraction = tileSize / textureSize;
 		r.pxNudge = 0.5 / textureSize;
 	},
@@ -92,24 +109,32 @@ var renderer = {
 		);	
 	},
 
-	init: function(options) {
-		const r = this;
-		options = Object.assign({}, r.defaultOptions, options);
-		console.log(options);
+	addWebGLShorthand: function(gl) {
 		// Create shorthand WebGL function names
 		// var webglShortFunctionNames = {};
 		for (var name in gl) {
-			if (gl[name].length != udef) {
+			if (gl[name].length !== undefined) {
 				gl[name.match(/(^..|[A-Z]|\d.|v$)/g).join('')] = gl[name];
 				// webglShortFunctionNames[name] = 'gl.'+name.match(/(^..|[A-Z]|\d.|v$)/g).join('');
 			}
 		}
 		// console.log(JSON.stringify(webglShortFunctionNames, null, '\t'));
+	},
+
+	init: function(options) {
+		const r = this;
+		options = Object.assign({}, r.defaultOptions, options);
+		console.log(options);
+
+		const c = options.canvas || document.getElementById(options.canvasId);
+		gl = c.getContext('webgl') || c.getContext('experimental-webgl');
+		r.addWebGLShorthand(gl);
 
 		r.setBufferData();
 		r.setSize(1024, 16);
 		r.maxLights = options.maxLights;
 		r.setLightData(options.maxLights);
+
 		const vertexBuffer = gl.createBuffer();
 		gl.bindBuffer(gl.ARRAY_BUFFER, vertexBuffer);
 		gl.bufferData(gl.ARRAY_BUFFER, r.bufferData, gl.DYNAMIC_DRAW);
@@ -120,7 +145,7 @@ var renderer = {
 		gl.linkProgram(r.shaderProgram);
 		gl.useProgram(r.shaderProgram);
 
-		camera_uniform = gl.getUniformLocation(r.shaderProgram, "cam");
+		r.cameraUniform = gl.getUniformLocation(r.shaderProgram, "cam");
 		r.lightUniform = gl.getUniformLocation(r.shaderProgram, "l");
 
 		gl.enable(gl.DEPTH_TEST);
@@ -134,17 +159,17 @@ var renderer = {
 	},
 
 	bindImage: function (image) {
-		var texture_2d = gl.TEXTURE_2D;
-		gl.bindTexture(texture_2d, gl.createTexture());
-		gl.texImage2D(texture_2d, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-		gl.texParameteri(texture_2d, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
-		gl.texParameteri(texture_2d, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
-		gl.texParameteri(texture_2d, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
-		gl.texParameteri(texture_2d, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+		const tex2d = gl.TEXTURE_2D;
+		gl.bindTexture(tex2d, gl.createTexture());
+		gl.texImage2D(tex2d, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+		gl.texParameteri(tex2d, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
+		gl.texParameteri(tex2d, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+		gl.texParameteri(tex2d, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+		gl.texParameteri(tex2d, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 	},
 
 	compileShader: function (shaderType, shaderSource) {
-		var shader = gl.createShader(shaderType);
+		const shader = gl.createShader(shaderType);
 		gl.shaderSource(shader, shaderSource);
 		gl.compileShader(shader);
 		// console.log(gl.getShaderInfoLog(shader));
@@ -163,34 +188,32 @@ var renderer = {
 		// Only push lights near to the camera
 		var maxLightDistance = (128 + 1/falloff); // cheap ass approximation
 		if (
-			num_lights < o.maxLights &&
+			o.lights < o.maxLights &&
 			_math.abs(-x - camera.x) < maxLightDistance &&
 			_math.abs(-z - camera.z) < maxLightDistance
 		) {
-			o.lightData.set([x, y, z, r, g, b, falloff], num_lights*7);
-			num_lights++;
+			o.lightData.set([x, y, z, r, g, b, falloff], o.lights*7);
+			o.lights++;
 		}
 	},
 
 	prepareFrame: function () {
 		const r = this;
-		num_verts = level_num_verts;
-		num_lights = 0;
-	
+		r.setVerts(r.levelVerts).clearLights();
 		// reset all lights
 		r.lightData.fill(1);
 	},
 
 	endFrame: function () {
 		const r = this;
-		gl.uniform3f(camera_uniform, camera.x, camera.y - 10, camera.z - 30);
+		gl.uniform3f(r.cameraUniform, camera.x, camera.y - 10, camera.z - 30);
 		gl.uniform1fv(r.lightUniform, r.lightData);
 	
 		gl.clearColor(0,0,0,1);
 		gl.clear(gl.COLOR_BUFFER_BIT|gl.DEPTH_BUFFER_BIT);
 	
 		gl.bufferData(gl.ARRAY_BUFFER, r.bufferData, gl.DYNAMIC_DRAW);
-		gl.drawArrays(gl.TRIANGLES, 0, num_verts);
+		gl.drawArrays(gl.TRIANGLES, 0, r.verts);
 	},
 
 	// Pushes
@@ -206,8 +229,8 @@ var renderer = {
 			x2, y2, z2, u2, 0, nx, ny, nz,
 			x3, y3, z3, u, 1, nx, ny, nz,
 			x4, y4, z4, u2, 1, nx, ny, nz
-		], num_verts * 8);
-		num_verts += 6;
+		], r.verts * 8);
+		r.verts += 6;
 	},
 
 	pushSprite: function (x, y, z, tile) {
@@ -227,11 +250,14 @@ var renderer = {
 	
 	pushBlock: function (x, z, y = 8, tileTop, tileSites) {
 		const r = this;
-		r.pushQuad(x, y, z, x + 8, y, z, x, y, z + 8, x + 8, y, z + 8, 0, 1, 0, tileTop); // top
-		r.pushQuad(x + 8, y, z, x + 8, y, z + 8, x + 8, 0, z, x + 8, 0, z + 8, 1, 0, 0, tileSites); // right
-		r.pushQuad(x, y, z + 8, x + 8, y, z + 8, x, 0, z + 8, x + 8, 0, z + 8, 0, 0, 1, tileSites); // front
-		r.pushQuad(x, y, z, x, y, z + 8, x, 0, z, x, 0, z + 8, -1, 0, 0, tileSites); // left
+		const x2 = x + 8;
+		const z2 = z + 8;
+		r.pushQuad(x, y, z, x2, y, z, x, y, z2, x2, y, z2, 0, 1, 0, tileTop); // top
+		r.pushQuad(x2, y, z, x2, y, z2, x2, 0, z, x2, 0, z2, 1, 0, 0, tileSites); // right
+		r.pushQuad(x, y, z2, x2, y, z2, x, 0, z2, x2, 0, z2, 0, 0, 1, tileSites); // front
+		r.pushQuad(x, y, z, x, y, z2, x, 0, z, x, 0, z2, -1, 0, 0, tileSites); // left
 	}
 };
+return renderer;
 
-
+})();
