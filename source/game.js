@@ -19,7 +19,7 @@ var udef, // global undefined
 
 	current_level = 0,
 	entity_player,
-	entities = [],
+	entities = [];
 
 function next_level(callback) {
 	if (current_level == 3) {
