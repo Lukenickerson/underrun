@@ -76,7 +76,7 @@ class entity_t {
 	_kill() {
 		if (!this._dead) {
 			this._dead = true;
-			entities_to_kill.push(this);
+			game.entitiesToKill.push(this);
 		}
 	}
 

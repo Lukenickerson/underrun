@@ -20,11 +20,10 @@ var udef, // global undefined
 	current_level = 0,
 	entity_player,
 	entities = [],
-	entities_to_kill = [];
 
 function next_level(callback) {
 	if (current_level == 3) {
-		entities_to_kill.push(entity_player);
+		game.entitiesToKill.push(entity_player);
 		terminal_run_outro();
 	} else {
 		current_level++;
@@ -109,7 +108,7 @@ function load_level(id, callback) {
 				_math.abs(e.x - entity_player.x) < 64 &&
 				_math.abs(e.z - entity_player.z) < 64
 			) {
-				entities_to_kill.push(e);
+				game.entitiesToKill.push(e);
 			}
 		}
 
@@ -130,6 +129,8 @@ function reload_level() {
 }
 
 var game = {
+	entitiesToKill: [],
+
 	init: function (doc) {
 		this.doc = doc;
 		this.setupEvents(doc);
@@ -227,10 +228,10 @@ var game = {
 		renderer.endFrame();
 
 		// remove dead entities
-		entities = entities.filter(function(entity) {
-			return entities_to_kill.indexOf(entity) === -1;
+		entities = entities.filter((entity) => {
+			return this.entitiesToKill.indexOf(entity) === -1;
 		});
-		entities_to_kill = [];
+		this.entitiesToKill = [];
 
 		requestAnimationFrame(() => { this.tick(); });
 	}

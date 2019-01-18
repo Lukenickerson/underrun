@@ -239,7 +239,7 @@ const renderer = {
 			_math.abs(-x - camera.x) < 128 && 
 			_math.abs(-z - camera.z) < 128
 		) {
-			var tilt = 3+(camera.z + z)/12; // tilt sprite when closer to camera
+			var tilt = 3 + (camera.z + z) / 12; // tilt sprite when closer to camera
 			this.pushQuad(x, y + 6, z, x + 6, y + 6, z, x, y, z + tilt, x + 6, y, z + tilt, 0, 0, 1, tile);
 		}
 	},
