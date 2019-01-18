@@ -1,8 +1,10 @@
 # UNDERRUN - A JS13k GAME
 
-My entry for the 2018 [js13k](https://js13kgames.com/) competition.
+UNDERRUN is [Dominic Szablewski](https://github.com/phoboslab)'s entry for the 2018 [js13k](https://js13kgames.com/) competition.
 
-Play here: https://phoboslab.org/underrun/
+This fork was created to refactor some of the code (in ES6), and eventually create generic libraries for re-use. There's a lot of great code packed into so few lines of code, that I feel it can be useful for future js13k game jams.
+
+Play the original here: https://phoboslab.org/underrun/
 
 MIT Licensed
 
